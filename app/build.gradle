@@ -14,8 +14,13 @@ android {
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "NEWS_API_KEY", "\"973e29acb34d49fba42885664316a10f\""
+        testInstrumentationRunner "com.sample.newsapp.DelegateAndroidJUnitRunner"
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
 
     buildTypes {
@@ -46,5 +51,15 @@ dependencies {
 
     implementation "com.google.dagger:dagger:2.29.1"
     kapt "com.google.dagger:dagger-compiler:2.29.1"
+    kaptAndroidTest "com.google.dagger:dagger-compiler:2.29.1"
+
+    implementation 'com.amitshekhar.android:rx2-android-networking:1.0.2'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.20'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+
+    def room_version = "2.3.0"
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-rxjava2:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
 
 }
