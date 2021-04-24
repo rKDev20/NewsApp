@@ -1,6 +1,5 @@
 package com.sample.newsapp.modules
 
-import android.content.Context
 import dagger.Module
 import dagger.Provides
 import java.text.SimpleDateFormat
@@ -8,13 +7,7 @@ import java.util.*
 import javax.inject.Singleton
 
 @Module
-class NewsAppModule(private val application: Context) {
-
-    @Singleton
-    @Provides
-    fun providesApplication(): Context {
-        return application
-    }
+class NewsAppModule {
 
     @Singleton
     @Provides
