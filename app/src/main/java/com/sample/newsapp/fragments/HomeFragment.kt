@@ -1,6 +1,7 @@
 package com.sample.newsapp.fragments
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.sample.newsapp.adapters.NewsAdapter
 import com.sample.newsapp.adapters.NewsClickListener
 import com.sample.newsapp.data.model.NewsModel
@@ -20,7 +22,6 @@ class HomeFragment : Fragment(), NewsClickListener {
 
     private lateinit var binding: FragmentHomeBinding
     private lateinit var adapter: NewsAdapter
-    private lateinit var layoutManager: LinearLayoutManager
 
     private val disposable = CompositeDisposable()
 
@@ -98,7 +99,10 @@ class HomeFragment : Fragment(), NewsClickListener {
 
     private fun setupRecyclerView() {
         adapter = NewsAdapter(this)
-        layoutManager = LinearLayoutManager(requireContext())
+        val layoutManager =
+            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                LinearLayoutManager(requireContext())
+            else StaggeredGridLayoutManager(3, RecyclerView.VERTICAL)
 
         binding.recyclerView.layoutManager = layoutManager
         binding.recyclerView.adapter = adapter
@@ -107,7 +111,14 @@ class HomeFragment : Fragment(), NewsClickListener {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
                     if (dy > 0) {
-                        val lastPosition = layoutManager.findLastCompletelyVisibleItemPosition()
+                        var lastPosition = -1
+                        if (layoutManager is LinearLayoutManager)
+                            lastPosition = layoutManager.findLastCompletelyVisibleItemPosition()
+                        else if (layoutManager is StaggeredGridLayoutManager)
+                            lastPosition =
+                                layoutManager.findLastCompletelyVisibleItemPositions(null)[0]
+                        if (lastPosition < 0)
+                            return
                         val totalSize = adapter.itemCount
                         if (totalSize - lastPosition <= thresholdPositionToLoadNewData)
                             model.loadNextPage()
