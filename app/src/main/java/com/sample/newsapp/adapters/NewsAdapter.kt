@@ -44,6 +44,9 @@ class NewsAdapter(private val listener: NewsClickListener) :
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             description.append(" Click to read more.", StyleSpan(Typeface.BOLD_ITALIC), 0)
         }
+        if (activeDescription.contains(news.title))
+            binding.extraContent.visibility = View.VISIBLE
+        else binding.extraContent.visibility = View.GONE
         binding.description.text = description
         binding.source.text = binding.source.context.getString(R.string.source, news.source.name)
         binding.root.setOnClickListener {
