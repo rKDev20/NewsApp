@@ -7,7 +7,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.*
+import android.webkit.RenderProcessGoneDetail
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.sample.newsapp.databinding.FragmentWebViewBinding
@@ -76,12 +78,14 @@ class WebViewFragment : Fragment() {
                     binding.progressBar.visibility = View.GONE
                 }
 
+                @Suppress("DEPRECATION")
                 override fun onReceivedError(
                     view: WebView?,
-                    request: WebResourceRequest?,
-                    error: WebResourceError?
+                    errorCode: Int,
+                    description: String?,
+                    failingUrl: String?
                 ) {
-                    super.onReceivedError(view, request, error)
+                    super.onReceivedError(view, errorCode, description, failingUrl)
                     model.webViewDestroyed()
                 }
 
