@@ -40,24 +40,23 @@ class NewsViewModel : ViewModel() {
     init {
         NewsApplication.component.inject(this)
         loadCachedNews()
+        loadLatestNews()
     }
 
-    private fun loadCachedNews() {
+    private fun loadCachedNews(explicit: Boolean = false) {
         isOfflineDataInFlight = true
-        state.onNext(NewsState(State.STATE_LOADING, "Loading news..."))
+        if (explicit) state.onNext(NewsState(State.STATE_LOADING, "Loading news..."))
         disposable.add(
             repository.fetchCachedNews(offlinePageNo)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { list ->
                     isOfflineDataInFlight = false
-                    if (list.isNotEmpty()) {
+                    if (list.isNotEmpty() && mode == MODE_OFFLINE) {
                         offlineDataList.addAll(list)
                         offlinePageNo++
                         dispatchNewData()
-                        state.onNext(NewsState(State.STATE_AVAILABLE))
                     }
-                    loadLatestNews()
                 }
         )
     }
@@ -74,9 +73,12 @@ class NewsViewModel : ViewModel() {
                         if (list.isNotEmpty()) {
                             onlineDataList.addAll(list)
                             onlinePageNo++
-                            if (mode == MODE_OFFLINE)
+                            if (offlineDataList.isNotEmpty() && mode == MODE_OFFLINE)
                                 newDataAvailability.onNext(true)
-                            else dispatchNewData()
+                            else {
+                                mode = MODE_ONLINE
+                                dispatchNewData()
+                            }
                         }
                     },
                     {
@@ -89,6 +91,7 @@ class NewsViewModel : ViewModel() {
     }
 
     private fun dispatchNewData() {
+        state.onNext(NewsState(State.STATE_AVAILABLE))
         dataStream.onNext(
             if (mode == MODE_OFFLINE)
                 offlineDataList
@@ -122,7 +125,7 @@ class NewsViewModel : ViewModel() {
             && !isOnlineDataInFlight
             && !isOfflineDataInFlight
         ) {
-            loadCachedNews()
+            loadCachedNews(true)
         }
     }
 
