@@ -3,7 +3,9 @@ package com.sample.newsapp.glide.transformations
 import android.graphics.*
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
+import com.bumptech.glide.util.Util
 import java.security.MessageDigest
+
 
 class GradientTransformation : BitmapTransformation() {
     override fun updateDiskCacheKey(messageDigest: MessageDigest) {
@@ -31,5 +33,15 @@ class GradientTransformation : BitmapTransformation() {
         paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DARKEN)
         canvas.drawRect(0f, 0f, toTransform.width.toFloat(), toTransform.height.toFloat(), paint)
         return toTransform
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is GradientTransformation
+    }
+
+    override fun hashCode(): Int {
+        return Util.hashCode(
+            "GlideTransformation".hashCode(),
+        )
     }
 }
