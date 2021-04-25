@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
         setupStateHandlers()
         setupDataStreamHandler()
         setupNewDataAvailabilityHandler()
+        binding.retry.setOnClickListener { model.retry() }
     }
 
     private fun setupNewDataAvailabilityHandler() {
@@ -59,16 +60,19 @@ class MainActivity : AppCompatActivity() {
                         binding.recyclerView.visibility = View.VISIBLE
                         binding.statusText.visibility = View.GONE
                         binding.progressBar.visibility = View.GONE
+                        binding.retry.visibility = View.GONE
                     }
                     NewsViewModel.State.STATE_LOADING -> {
                         binding.recyclerView.visibility = View.GONE
                         binding.statusText.visibility = View.VISIBLE
                         binding.progressBar.visibility = View.VISIBLE
+                        binding.retry.visibility = View.GONE
                     }
                     NewsViewModel.State.STATE_ERROR -> {
                         binding.recyclerView.visibility = View.GONE
                         binding.statusText.visibility = View.VISIBLE
                         binding.progressBar.visibility = View.GONE
+                        binding.retry.visibility = View.VISIBLE
                     }
                 }
                 binding.statusText.text = it.message

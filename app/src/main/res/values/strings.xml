@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">NewsApp</string>
-    <string name="new_feed_available">New feed available</string>
+    <string name="click_to_refresh">Click to refresh</string>
+    <string name="retry">Retry</string>
 </resources>

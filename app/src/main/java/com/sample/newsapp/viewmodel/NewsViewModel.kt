@@ -44,6 +44,7 @@ class NewsViewModel : ViewModel() {
 
     private fun loadCachedNews() {
         isOfflineDataInFlight = true
+        state.onNext(NewsState(State.STATE_LOADING, "Loading news..."))
         disposable.add(
             repository.fetchCachedNews(offlinePageNo)
                 .subscribeOn(Schedulers.io())
@@ -113,6 +114,16 @@ class NewsViewModel : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         disposable.clear()
+    }
+
+    fun retry() {
+        if (offlineDataList.isEmpty()
+            && onlineDataList.isEmpty()
+            && !isOnlineDataInFlight
+            && !isOfflineDataInFlight
+        ) {
+            loadCachedNews()
+        }
     }
 
     data class NewsState(
