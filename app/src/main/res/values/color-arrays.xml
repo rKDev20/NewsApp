@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="placeholders">
+        <item>#bbdefb</item>
+        <item>#d7ccc8</item>
+        <item>#ffe0b2</item>
+        <item>#f0f4c3</item>
+        <item>#e1bee7</item>
+        <item>#f8bbd0</item>
+        <item>#c8e6c9</item>
+        <item>#10eaf0</item>
+        <item>#95C5FF</item>
+        <item>#FFEB85</item>
+        <item>#FFAA69</item>
+        <item>#8DE8DE</item>
+        <item>#CAB1FF</item>
+        <item>#cbff9c</item>
+        <item>#4c9ffd</item>
+    </array>
+</resources>

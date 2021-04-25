@@ -1,10 +1,10 @@
 package com.sample.newsapp
 
-import android.app.Application
+import androidx.multidex.MultiDexApplication
 import com.sample.newsapp.components.DaggerNewsAppComponent
 import com.sample.newsapp.components.NewsAppComponent
 
-open class NewsApplication : Application() {
+open class NewsApplication : MultiDexApplication() {
 
     override fun onCreate() {
         super.onCreate()

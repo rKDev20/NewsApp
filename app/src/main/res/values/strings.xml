@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">NewsApp</string>
+    <string name="new_feed_available">New feed available</string>
 </resources>
