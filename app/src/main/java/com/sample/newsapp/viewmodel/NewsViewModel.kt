@@ -29,6 +29,9 @@ class NewsViewModel : ViewModel() {
     private var offlinePageNo = 0
     private var onlinePageNo = 0
 
+    private var isOfflineDataInFlight = false
+    private var isOnlineDataInFlight = false
+
     val dataStream: BehaviorSubject<List<NewsModel>> = BehaviorSubject.create()
     val newDataAvailability: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
     val state: BehaviorSubject<NewsState> =
@@ -40,11 +43,13 @@ class NewsViewModel : ViewModel() {
     }
 
     private fun loadCachedNews() {
+        isOfflineDataInFlight = true
         disposable.add(
             repository.fetchCachedNews(offlinePageNo)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { list ->
+                    isOfflineDataInFlight = false
                     if (list.isNotEmpty()) {
                         offlineDataList.addAll(list)
                         offlinePageNo++
@@ -57,19 +62,28 @@ class NewsViewModel : ViewModel() {
     }
 
     private fun loadLatestNews() {
+        isOnlineDataInFlight = true
         disposable.add(
             repository.fetchLatestNews(onlinePageNo)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { list ->
-                    if (list.isNotEmpty()) {
-                        onlineDataList.addAll(list)
-                        onlinePageNo++
-                        if (mode == MODE_OFFLINE)
-                            newDataAvailability.onNext(true)
-                        else dispatchNewData()
+                .subscribe(
+                    { list ->
+                        isOnlineDataInFlight = false
+                        if (list.isNotEmpty()) {
+                            onlineDataList.addAll(list)
+                            onlinePageNo++
+                            if (mode == MODE_OFFLINE)
+                                newDataAvailability.onNext(true)
+                            else dispatchNewData()
+                        }
+                    },
+                    {
+                        isOnlineDataInFlight = false
+                        if (offlineDataList.isEmpty() && onlineDataList.isEmpty())
+                            state.onNext(NewsState(State.STATE_ERROR, "Failed to load news"))
                     }
-                }
+                )
         )
     }
 
@@ -90,9 +104,10 @@ class NewsViewModel : ViewModel() {
     }
 
     fun loadNextPage() {
-        if (mode == MODE_OFFLINE) {
+        if (mode == MODE_OFFLINE && !isOfflineDataInFlight)
             loadCachedNews()
-        } else loadLatestNews()
+        else if (mode == MODE_ONLINE && !isOnlineDataInFlight)
+            loadLatestNews()
     }
 
     override fun onCleared() {
