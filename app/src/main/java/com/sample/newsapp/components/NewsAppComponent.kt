@@ -4,6 +4,7 @@ import android.content.Context
 import com.sample.newsapp.data.source.NewsRepository
 import com.sample.newsapp.modules.ApiEndpointModule
 import com.sample.newsapp.modules.NewsAppModule
+import com.sample.newsapp.qualifiers.NewsStaleTime
 import com.sample.newsapp.viewmodel.NewsViewModel
 import dagger.BindsInstance
 import dagger.Component
@@ -27,4 +28,7 @@ abstract class NewsAppComponent {
     abstract fun getNewsRepository(): NewsRepository
 
     abstract fun getDateTimeFormatter(): SimpleDateFormat
+
+    @NewsStaleTime
+    abstract fun getStaleTimeForNews(): Int
 }

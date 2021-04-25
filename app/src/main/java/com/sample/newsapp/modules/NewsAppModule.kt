@@ -1,5 +1,6 @@
 package com.sample.newsapp.modules
 
+import com.sample.newsapp.qualifiers.NewsStaleTime
 import dagger.Module
 import dagger.Provides
 import java.text.SimpleDateFormat
@@ -11,8 +12,10 @@ class NewsAppModule {
 
     @Singleton
     @Provides
-    fun getDateTimeFormatter(): SimpleDateFormat {
-        return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
-    }
+    fun getDateTimeFormatter() = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
 
+    @NewsStaleTime
+    @Singleton
+    @Provides
+    fun getStaleTimeForNews() = 3
 }

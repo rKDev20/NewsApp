@@ -13,8 +13,11 @@ interface NewsDao {
     @Query("SELECT * FROM NewsModel ORDER BY datetime(publishedAt) DESC LIMIT :lowerLimit, :upperLimit")
     fun getNews(lowerLimit: Int, upperLimit: Int): Single<List<NewsModel>>
 
-    @Query("DELETE FROM NewsModel WHERE datetime(publishedAt) <= datetime('now', 'localtime', '-1 days')")
-    fun deleteOldNews(): Completable
+    @Query("SELECT * FROM NewsModel ORDER BY datetime(publishedAt) DESC")
+    fun getNews(): Single<List<NewsModel>>
+
+    @Query("DELETE FROM NewsModel WHERE datetime(publishedAt) <= datetime('now', 'localtime', '-'||:staleTime||' days')")
+    fun deleteOldNews(staleTime: Int): Completable
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertOrUpdate(news: List<NewsModel>): Completable
