@@ -8,7 +8,6 @@ import com.sample.newsapp.data.model.NewsModel
 import com.sample.newsapp.data.model.NewsSource
 import com.sample.newsapp.data.source.ApiNewsSource
 import com.sample.newsapp.data.source.LocalNewsSource
-import com.sample.newsapp.modules.NewsAppModule
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,7 +33,7 @@ class LocalNewsSourceTest {
     fun verifyNewsDao() {
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         newsAppComponent = DaggerNewsAppComponentTest.builder()
-            .newsAppModule(NewsAppModule(appContext))
+            .application(appContext)
             .build()
         newsAppComponent.inject(this)
         val newsModel1 = NewsModel(
