@@ -40,7 +40,8 @@ class NewsAdapter(private val listener: NewsClickListener) :
             .transform(GradientTransformation())
             .into(binding.image)
         val description = SpannableStringBuilder()
-        description.append(news.description)
+        val descriptionString = news.description ?: news.content ?: ""
+        description.append(descriptionString)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             description.append(" Click to read more.", StyleSpan(Typeface.BOLD_ITALIC), 0)
         }

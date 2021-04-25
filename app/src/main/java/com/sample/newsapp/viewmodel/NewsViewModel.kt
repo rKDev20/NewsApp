@@ -46,9 +46,8 @@ class NewsViewModel : ViewModel() {
         loadLatestNews()
     }
 
-    private fun loadCachedNews(explicit: Boolean = false) {
+    private fun loadCachedNews() {
         isOfflineDataInFlight = true
-        if (explicit) state.onNext(NewsState(State.STATE_LOADING, "Loading news..."))
         disposable.add(
             repository.fetchCachedNews(offlinePageNo)
                 .subscribeOn(Schedulers.io())
@@ -64,8 +63,9 @@ class NewsViewModel : ViewModel() {
         )
     }
 
-    private fun loadLatestNews() {
+    private fun loadLatestNews(explicit: Boolean = false) {
         isOnlineDataInFlight = true
+        if (explicit) state.onNext(NewsState(State.STATE_LOADING, "Loading news..."))
         disposable.add(
             repository.fetchLatestNews(onlinePageNo)
                 .subscribeOn(Schedulers.io())
@@ -76,13 +76,14 @@ class NewsViewModel : ViewModel() {
                         if (list.isNotEmpty()) {
                             onlineDataList.addAll(list)
                             onlinePageNo++
-                            if (offlineDataList.isNotEmpty() && mode == MODE_OFFLINE)
+                            if (!explicit && offlineDataList.isNotEmpty() && mode == MODE_OFFLINE)
                                 newDataAvailability.onNext(true)
                             else {
                                 mode = MODE_ONLINE
                                 dispatchNewData()
                             }
-                        }
+                        } else if (explicit)
+                            state.onNext(NewsState(State.STATE_ERROR, "Failed to load news"))
                     },
                     {
                         isOnlineDataInFlight = false
@@ -128,7 +129,7 @@ class NewsViewModel : ViewModel() {
             && !isOnlineDataInFlight
             && !isOfflineDataInFlight
         ) {
-            loadCachedNews(true)
+            loadLatestNews(true)
         }
     }
 

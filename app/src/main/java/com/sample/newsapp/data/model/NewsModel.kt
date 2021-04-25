@@ -10,7 +10,7 @@ data class NewsModel(
     @PrimaryKey val title: String,
     @Embedded var source: NewsSource,
     val author: String?,
-    val description: String,
+    val description: String?,
     val url: String?,
     val urlToImage: String?,
     val publishedAt: String,
