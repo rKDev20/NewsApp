@@ -7,11 +7,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sample.newsapp.adapters.NewsAdapter
+import com.sample.newsapp.adapters.NewsClickListener
+import com.sample.newsapp.data.model.NewsModel
 import com.sample.newsapp.databinding.ActivityMainBinding
 import com.sample.newsapp.viewmodel.NewsViewModel
 import io.reactivex.disposables.CompositeDisposable
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), NewsClickListener {
 
     private lateinit var adapter: NewsAdapter
     private lateinit var layoutManager: LinearLayoutManager
@@ -81,7 +83,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = NewsAdapter()
+        adapter = NewsAdapter(this)
         layoutManager = LinearLayoutManager(this)
 
         binding.recyclerView.layoutManager = layoutManager
@@ -104,5 +106,9 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         disposable.dispose()
         super.onDestroy()
+    }
+
+    override fun onClick(news: NewsModel) {
+
     }
 }

@@ -2,4 +2,6 @@
     <string name="app_name">NewsApp</string>
     <string name="click_to_refresh">Click to refresh</string>
     <string name="retry">Retry</string>
+    <string name="back">close…</string>
+    <string name="source">source: %1$s</string>
 </resources>

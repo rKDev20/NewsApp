@@ -3,14 +3,17 @@ package com.sample.newsapp.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.sample.newsapp.R
 import com.sample.newsapp.data.model.NewsModel
+import com.sample.newsapp.databinding.ItemNewsBinding
+import com.sample.newsapp.glide.transformations.GradientTransformation
 
-class NewsAdapter : RecyclerView.Adapter<NewsViewHolder>() {
+class NewsAdapter(private val listener: NewsClickListener) :
+    RecyclerView.Adapter<NewsViewHolder>() {
+
+    private val activeDescription: HashSet<String> = HashSet()
 
     var dataList: List<NewsModel> = listOf()
         set(value) {
@@ -20,18 +23,33 @@ class NewsAdapter : RecyclerView.Adapter<NewsViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsViewHolder {
         return NewsViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.item_news, parent, false)
+            ItemNewsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     }
 
     override fun onBindViewHolder(holder: NewsViewHolder, position: Int) {
         val news = dataList[position]
-        holder.title.text = news.title
-        Glide.with(holder.image)
+        val binding = holder.binding
+        binding.title.text = news.title
+        Glide.with(binding.image)
             .load(news.urlToImage)
             .placeholder(R.drawable.placeholder_news)
-            .into(holder.image)
-        holder.description.text = news.description
+            .transform(GradientTransformation())
+            .into(binding.image)
+        binding.description.text = news.description
+        binding.source.text = binding.source.context.getString(R.string.source, news.source.name)
+        binding.root.setOnClickListener {
+            if (activeDescription.contains(news.title)) {
+                listener.onClick(news)
+            } else {
+                binding.extraContent.visibility = View.VISIBLE
+                activeDescription.add(news.title)
+            }
+        }
+        binding.back.setOnClickListener {
+            binding.extraContent.visibility = View.GONE
+            activeDescription.remove(news.title)
+        }
     }
 
     override fun getItemCount(): Int {
@@ -39,8 +57,8 @@ class NewsAdapter : RecyclerView.Adapter<NewsViewHolder>() {
     }
 }
 
-class NewsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    val title: TextView = itemView.findViewById(R.id.title)
-    val image: ImageView = itemView.findViewById(R.id.image)
-    val description: TextView = itemView.findViewById(R.id.description)
+class NewsViewHolder(val binding: ItemNewsBinding) : RecyclerView.ViewHolder(binding.root)
+
+interface NewsClickListener {
+    fun onClick(news: NewsModel)
 }
