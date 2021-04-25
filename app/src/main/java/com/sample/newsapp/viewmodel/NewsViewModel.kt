@@ -8,6 +8,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
 
 class NewsViewModel : ViewModel() {
@@ -36,6 +37,8 @@ class NewsViewModel : ViewModel() {
     val newDataAvailability: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
     val state: BehaviorSubject<NewsState> =
         BehaviorSubject.createDefault(NewsState(State.STATE_LOADING, "Loading news..."))
+    val expandNewListener: PublishSubject<NewsModel> = PublishSubject.create()
+    val webviewCrashedListener: PublishSubject<Any> = PublishSubject.create()
 
     init {
         NewsApplication.component.inject(this)
@@ -127,6 +130,10 @@ class NewsViewModel : ViewModel() {
         ) {
             loadCachedNews(true)
         }
+    }
+
+    fun webViewDestroyed() {
+        webviewCrashedListener.onNext(Any())
     }
 
     data class NewsState(

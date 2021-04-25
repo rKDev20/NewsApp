@@ -1,5 +1,8 @@
 package com.sample.newsapp.adapters
 
+import android.graphics.Typeface
+import android.text.SpannableStringBuilder
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,7 +39,12 @@ class NewsAdapter(private val listener: NewsClickListener) :
             .placeholder(R.drawable.placeholder_news)
             .transform(GradientTransformation())
             .into(binding.image)
-        binding.description.text = news.description
+        val description = SpannableStringBuilder()
+        description.append(news.description)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            description.append(" Click to read more.", StyleSpan(Typeface.BOLD_ITALIC), 0)
+        }
+        binding.description.text = description
         binding.source.text = binding.source.context.getString(R.string.source, news.source.name)
         binding.root.setOnClickListener {
             if (activeDescription.contains(news.title)) {

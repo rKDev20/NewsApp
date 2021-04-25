@@ -2,105 +2,72 @@ package com.sample.newsapp
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.sample.newsapp.adapters.NewsAdapter
-import com.sample.newsapp.adapters.NewsClickListener
 import com.sample.newsapp.data.model.NewsModel
 import com.sample.newsapp.databinding.ActivityMainBinding
+import com.sample.newsapp.fragments.HomeFragment
+import com.sample.newsapp.fragments.WebViewFragment
 import com.sample.newsapp.viewmodel.NewsViewModel
 import io.reactivex.disposables.CompositeDisposable
 
-class MainActivity : AppCompatActivity(), NewsClickListener {
-
-    private lateinit var adapter: NewsAdapter
-    private lateinit var layoutManager: LinearLayoutManager
-
-    private val disposable = CompositeDisposable()
-
-    private lateinit var binding: ActivityMainBinding
-    private val thresholdPositionToLoadNewData = 5
+class MainActivity : AppCompatActivity() {
 
     private val model: NewsViewModel by viewModels()
+    private lateinit var binding: ActivityMainBinding
+    private val homeFragment = HomeFragment()
+    private val disposable = CompositeDisposable()
+
+    private var isHomeFragmentActive = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupRecyclerView()
-        setupStateHandlers()
-        setupDataStreamHandler()
-        setupNewDataAvailabilityHandler()
-        binding.retry.setOnClickListener { model.retry() }
-    }
-
-    private fun setupNewDataAvailabilityHandler() {
-        disposable.add(
-            model.newDataAvailability.subscribe { isAvailable ->
-                binding.newDataAvailability.visibility =
-                    if (isAvailable) View.VISIBLE
-                    else View.GONE
-            }
-        )
-        binding.newDataAvailability.setOnClickListener { model.switchToLatestNews() }
-    }
-
-    private fun setupDataStreamHandler() {
-        disposable.add(
-            model.dataStream.subscribe { adapter.dataList = it }
-        )
-    }
-
-    private fun setupStateHandlers() {
-        disposable.add(
-            model.state.subscribe {
-                when (it.state) {
-                    NewsViewModel.State.STATE_AVAILABLE -> {
-                        binding.recyclerView.visibility = View.VISIBLE
-                        binding.statusText.visibility = View.GONE
-                        binding.progressBar.visibility = View.GONE
-                        binding.retry.visibility = View.GONE
-                    }
-                    NewsViewModel.State.STATE_LOADING -> {
-                        binding.recyclerView.visibility = View.GONE
-                        binding.statusText.visibility = View.VISIBLE
-                        binding.progressBar.visibility = View.VISIBLE
-                        binding.retry.visibility = View.GONE
-                    }
-                    NewsViewModel.State.STATE_ERROR -> {
-                        binding.recyclerView.visibility = View.GONE
-                        binding.statusText.visibility = View.VISIBLE
-                        binding.progressBar.visibility = View.GONE
-                        binding.retry.visibility = View.VISIBLE
-                    }
-                }
-                binding.statusText.text = it.message
+        openHomeFragment()
+        disposable.addAll(
+            model.expandNewListener.subscribe { openWebViewFragment(it) },
+            model.webviewCrashedListener.subscribe {
+                Toast.makeText(this, "Couldn't load news!", Toast.LENGTH_SHORT).show()
+                openHomeFragment()
             }
         )
     }
 
-    private fun setupRecyclerView() {
-        adapter = NewsAdapter(this)
-        layoutManager = LinearLayoutManager(this)
+    private fun openHomeFragment() {
+        isHomeFragmentActive = true
+        binding.title.apply {
+            text = getString(R.string.app_name)
+            visibility = View.VISIBLE
+        }
+        binding.webViewTitle.visibility = View.GONE
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.container, homeFragment, "home")
+            .commit()
+    }
 
-        binding.recyclerView.layoutManager = layoutManager
-        binding.recyclerView.adapter = adapter
-        binding.recyclerView.addOnScrollListener(
-            object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    super.onScrolled(recyclerView, dx, dy)
-                    if (dy > 0) {
-                        val lastPosition = layoutManager.findLastCompletelyVisibleItemPosition()
-                        val totalSize = adapter.itemCount
-                        if (totalSize - lastPosition <= thresholdPositionToLoadNewData)
-                            model.loadNextPage()
-                    }
-                }
+    private fun openWebViewFragment(newsModel: NewsModel) {
+        isHomeFragmentActive = false
+        newsModel.url?.let {
+            binding.webViewTitle.apply {
+                text = newsModel.title
+                visibility = View.VISIBLE
             }
-        )
+            binding.title.visibility = View.GONE
+            val fragment = WebViewFragment()
+            fragment.arguments = WebViewFragment.getBundle(it)
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.container, fragment, "webview")
+                .commit()
+        } ?: Toast.makeText(this, "Some error occurred", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onBackPressed() {
+        if (isHomeFragmentActive)
+            super.onBackPressed()
+        else openHomeFragment()
     }
 
     override fun onDestroy() {
@@ -108,7 +75,4 @@ class MainActivity : AppCompatActivity(), NewsClickListener {
         super.onDestroy()
     }
 
-    override fun onClick(news: NewsModel) {
-
-    }
 }
